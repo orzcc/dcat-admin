@@ -53,13 +53,27 @@ trait InteractsWithRenderApi
         $url = $this->renderable->getUrl();
 
         return <<<JS
+// 先清除已存在的事件
+target.off('{$this->target}:load');
+
+// 添加一个简单的状态锁
+let isRendering = false;
+
 target.on('{$this->target}:load', function () {
+    if (isRendering) {
+        console.log('Skip duplicate render');
+        return;
+    }
+
+    isRendering = true;
+
     Dcat.helpers.asyncRender('{$url}', function (html) {
         body.html(html);
-        
         {$this->loadScript}
-        
         target.trigger('{$this->target}:loaded');
+        isRendering = false;
+    }).fail(function() {
+        isRendering = false;
     });
 });
 JS;
