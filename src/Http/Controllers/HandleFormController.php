@@ -56,6 +56,11 @@ class HandleFormController
             return $form->field($column);
         }
 
+        // fix by orzcc 20250117 for table image form
+        if (is_string($relation) && strpos($relation, ',') !== false) {
+            $relation = explode(',', $relation);
+        }
+
         $relation = is_array($relation) ? current($relation) : $relation;
 
         $relationField = $form->field($relation);
